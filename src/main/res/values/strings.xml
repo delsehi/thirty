@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Thirty</string>
+    <string-array name="choices">
+        <item>Low</item>
+        <item>Four</item>
+        <item>Five</item>
+        <item>Six</item>
+        <item>Seven</item>
+        <item>Eight</item>
+        <item>Nine</item>
+        <item>Ten</item>
+        <item>Eleven</item>
+        <item>Twelve</item>
+    </string-array>
+</resources>
