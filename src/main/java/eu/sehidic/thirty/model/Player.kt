@@ -3,9 +3,9 @@ package eu.sehidic.thirty.model
 class Player {
     val dice = Array(6) { Die() }
 
-    fun keep(index: Int) {
+    fun toggleKeep(index: Int) {
         // Keep a certain die, will not be thrown the next round
-        this.dice[index].keep = true
+        this.dice[index].keep = !this.dice[index].keep
     }
 
     fun rollDice() {
