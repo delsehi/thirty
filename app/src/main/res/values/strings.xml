@@ -12,4 +12,7 @@
         <item>Eleven</item>
         <item>Twelve</item>
     </string-array>
+    <string name="die">A die</string>
+    <string name="throw_button_string">Throw</string>
+    <string name="title">Thirty Throws</string>
 </resources>
