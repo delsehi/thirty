@@ -1,10 +1,22 @@
 package eu.sehidic.thirty
 
-import eu.sehidic.thirty.model.Die
-import eu.sehidic.thirty.model.GameViewModel
-import eu.sehidic.thirty.model.Player
+import eu.sehidic.thirty.model.*
 import org.junit.Test
 import org.junit.Assert.*
+
+class TestScore {
+    @Test
+    fun dice_14_gives_5() {
+        val data = arrayOf (Die(1), Die(4))
+        assertEquals(Score(5), getScoreFromDice(Choice.FIVE, data))
+    }
+    @Test
+    fun dice_123456_gives_6() {
+        val data = arrayOf (Die(1), Die(2), Die(3), Die(4),
+        Die(5), Die(6))
+        assertEquals(Score(6), getScoreFromDice(Choice.LOW, data))
+    }
+}
 
 class TestDice {
     @Test
@@ -24,13 +36,11 @@ class TestPlayer {
         assertEquals(6, p.dice.size)
     }
 }
-
+/*
 class TestGame {
     @Test
     fun calculateLowScore() {
         val p = Player()
         val sut = GameViewModel()
-
-
     }
-}
+} */

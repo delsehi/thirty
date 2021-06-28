@@ -2,11 +2,15 @@ package eu.sehidic.thirty.model
 
 class Player {
     val dice = Array(6) { Die() }
-    var score = 0
+    private val score = emptyArray<Score>()
 
     fun toggleKeep(index: Int) {
         // Toggle whether the die should be thrown or not the next round.
         this.dice[index].keep = !this.dice[index].keep
+    }
+
+    fun getTotalScore(): Int {
+        return score.fold(0) { acc, e -> acc + e.score }
     }
 
     fun rollDice() {

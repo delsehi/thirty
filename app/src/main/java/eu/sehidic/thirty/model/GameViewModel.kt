@@ -2,8 +2,12 @@ package eu.sehidic.thirty.model
 
 import androidx.lifecycle.ViewModel
 
-const val MAX_THROWS = 2
+const val MAX_THROWS = 2 // Constant instead of magic numbers :)
 
+/**
+ * Controller class used by MainActivity.
+ *
+ */
 class GameViewModel: ViewModel() {
     private val player = Player()
     var round = 0
@@ -16,8 +20,8 @@ class GameViewModel: ViewModel() {
     fun getDice(): Array<Die> {
         return player.dice
     }
-    fun getCurrentScore(): Int {
-        return player.score
+    fun getTotalScore(): Int {
+        return player.getTotalScore()
     }
     fun toggleKeep(index: Int) {
         player.toggleKeep(index)
