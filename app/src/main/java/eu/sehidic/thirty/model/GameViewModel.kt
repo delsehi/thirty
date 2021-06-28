@@ -20,6 +20,16 @@ class GameViewModel: ViewModel() {
     fun getDice(): Array<Die> {
         return player.dice
     }
+    fun getKeptDice(): Array<Die> {
+        return player.dice.filter { it.keep }.toTypedArray()
+    }
+
+    fun roundDone() {
+        throws = 0
+        round += 1
+        player.resetDice()
+    }
+
     fun getTotalScore(): Int {
         return player.getTotalScore()
     }
@@ -27,26 +37,21 @@ class GameViewModel: ViewModel() {
         player.toggleKeep(index)
     }
     fun canThrow(): Boolean {
-        return throws < MAX_THROWS
+        return throws - 1 < MAX_THROWS
     }
     fun unKeepAllDice() {
         for (die in player.dice) {
             die.keep = false
         }
     }
-    fun addScore(target: Choice) {
-        when (target) {
-            Choice.LOW -> TODO()
-            Choice.FOUR -> TODO()
-            Choice.FIVE -> TODO()
-            Choice.SIX -> TODO()
-            Choice.SEVEN -> TODO()
-            Choice.EIGHT -> TODO()
-            Choice.NINE -> TODO()
-            Choice.TEN -> TODO()
-            Choice.ELEVEN -> TODO()
-            Choice.TWELVE -> TODO()
+    fun addScore(target: Choice, dice: Array<Die>): Int {
+        val score = getScoreFromDice(target, dice)
+        if (score.score > 0) {
+            player.useKeptDice()
         }
+        unKeepAllDice()
+        player.addScore(score)
+        return score.score
     }
 
 

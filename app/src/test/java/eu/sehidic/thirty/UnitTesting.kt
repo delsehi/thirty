@@ -35,6 +35,16 @@ class TestPlayer {
         val p = Player()
         assertEquals(6, p.dice.size)
     }
+    @Test
+    fun score_5_and_9_gives_14() {
+        val sut = Player()
+        val score1 = Score(5)
+        val score2 = Score(9)
+        sut.addScore(score1)
+        sut.addScore(score2)
+        assertEquals(14, sut.getTotalScore())
+    }
+
 }
 /*
 class TestGame {
