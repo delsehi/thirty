@@ -134,11 +134,10 @@
         app:layout_constraintTop_toBottomOf="@id/die_row1">
 
         <Spinner
-            android:id="@+id/spinner"
+            android:id="@+id/choices"
             android:layout_width="118dp"
             android:layout_height="54dp"
             android:spinnerMode="dropdown"
-
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 

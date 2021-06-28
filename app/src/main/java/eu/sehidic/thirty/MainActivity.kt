@@ -3,11 +3,9 @@ package eu.sehidic.thirty
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.Spinner
+import android.widget.*
 import androidx.lifecycle.ViewModelProviders
+import eu.sehidic.thirty.model.Choice
 import eu.sehidic.thirty.model.Die
 import eu.sehidic.thirty.model.GameViewModel
 
@@ -38,6 +36,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         findALlViews() // Make all views accessible in the code
         renderDice(gvm.getDice()) // Render the dice to reflect their values
+
+        val dropDownChoices = Choice.values()
+        val choiceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dropDownChoices)
+        choiceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
+        spinner.adapter = choiceAdapter
+
 
       //  var round = savedInstanceState?.getInt(ROUND) ?: 0
        // var throws = savedInstanceState?.getInt(THROWS) ?: 0
@@ -139,7 +143,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun findALlViews() {
-        spinner = findViewById(R.id.spinner) // Dropdown menu for LOW, four, etc
+        spinner = findViewById(R.id.choices) // Dropdown menu for LOW, four, etc
         throwButton = findViewById(R.id.throw_button) // Button for throwing dice.
         addScore = findViewById(R.id.add_score)
         roundDone = findViewById(R.id.done)
@@ -152,6 +156,8 @@ class MainActivity : AppCompatActivity() {
         die6 = findViewById(R.id.die6)
         // Save them in an array for easier access
         diceImages = arrayOf(die1, die2, die3, die4, die5, die6)
+
+
     }
 
 }
