@@ -4,6 +4,11 @@ import eu.sehidic.thirty.model.*
 import org.junit.Test
 import org.junit.Assert.*
 
+/**
+ * Basic unit tests used during development.
+ * @author Delfi Sehidic
+ */
+
 class TestScore {
     @Test
     fun dice_14_gives_5() {
@@ -42,15 +47,22 @@ class TestPlayer {
         val score2 = Score(9)
         sut.addScore(score1)
         sut.addScore(score2)
-        assertEquals(14, sut.getTotalScore())
+        assertEquals(14, sut.getCurrScore())
     }
 
 }
-/*
+
 class TestGame {
     @Test
-    fun calculateLowScore() {
-        val p = Player()
+    fun choicesAvailableOnlyOnce() {
         val sut = GameViewModel()
+        sut.throwDice()
+        val dice = sut.getDice()
+        val a = sut.getAvailableChoices()
+        sut.addScore(Choice.LOW, dice)
+        sut.roundDone()
+        val b = sut.getAvailableChoices()
+        assert(!b.contains(Choice.LOW))
+        assertNotEquals(a.size, b.size)
     }
-} */
+}

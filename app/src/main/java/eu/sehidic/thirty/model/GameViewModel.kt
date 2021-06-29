@@ -10,7 +10,10 @@ const val MAX_THROWS = 2 // Constant instead of magic numbers :)
  */
 class GameViewModel: ViewModel() {
     private val player = Player()
-    var round = 0
+    private var currentChoice: Choice? = null
+    private val rounds: MutableList<Round> = ArrayList()
+    private val availableChoices: MutableList<Choice> = Choice.values().toMutableList()
+    var round = 1
     var throws = 0
 
     fun throwDice() {
@@ -25,13 +28,30 @@ class GameViewModel: ViewModel() {
     }
 
     fun roundDone() {
+
         throws = 0
+
+        currentChoice?.let {
+            Round(round, it, player.getCurrScore()).also {
+                rounds.add(it)
+            }
+        }
+
+        player.clearScore()
         round += 1
+        availableChoices.remove(currentChoice)
+        currentChoice = null
         player.resetDice()
+
+
+    }
+
+    fun getAvailableChoices(): Array<Choice> {
+        return availableChoices.toTypedArray()
     }
 
     fun getTotalScore(): Int {
-        return player.getTotalScore()
+        return player.getCurrScore()
     }
     fun toggleKeep(index: Int) {
         player.toggleKeep(index)
@@ -46,6 +66,7 @@ class GameViewModel: ViewModel() {
     }
     fun addScore(target: Choice, dice: Array<Die>): Int {
         val score = getScoreFromDice(target, dice)
+        currentChoice = target
         if (score.score > 0) {
             player.useKeptDice()
         }

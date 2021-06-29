@@ -4,6 +4,7 @@ class Player {
     val dice = Array(6) { Die() }
     private val score: MutableList<Score> = ArrayList()
 
+
     fun toggleKeep(index: Int) {
         // Toggle whether the die should be thrown or not the next round.
         this.dice[index].keep = !this.dice[index].keep
@@ -11,6 +12,10 @@ class Player {
 
     fun addScore(newScore: Score) {
         this.score.add(newScore)
+    }
+
+    fun clearScore() {
+        this.score.clear()
     }
 
     fun resetDice() {
@@ -21,7 +26,7 @@ class Player {
         }
     }
 
-    fun getTotalScore(): Int {
+    fun getCurrScore(): Int {
        return score.fold(0) { acc, e -> acc + e.score }
     }
 

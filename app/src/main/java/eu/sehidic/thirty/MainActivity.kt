@@ -1,11 +1,12 @@
 package eu.sehidic.thirty
 
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.*
-import androidx.lifecycle.ViewModelProviders
+import androidx.lifecycle.ViewModelProvider
 import eu.sehidic.thirty.model.Choice
 import eu.sehidic.thirty.model.Die
 import eu.sehidic.thirty.model.GameViewModel
@@ -27,14 +28,19 @@ class MainActivity : AppCompatActivity() {
     private lateinit var die5: ImageView
     private lateinit var die6: ImageView
     private lateinit var diceImages: Array<ImageView>
+    private lateinit var gvm: GameViewModel
+    private lateinit var choiceAdapter: ArrayAdapter<Choice>
 
+    /*
+    TODO: Remove this when the app compiles again
     private val gvm: GameViewModel by lazy {
         ViewModelProviders.of(this).get(GameViewModel::class.java)
-    }
+    } */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        gvm = ViewModelProvider(this).get(GameViewModel::class.java)
         findALlViews() // Make all views accessible in the code
         renderDice(gvm.getDice()) // Render the dice to reflect their values
 
@@ -64,9 +70,18 @@ class MainActivity : AppCompatActivity() {
          */
         roundDone.setOnClickListener {
             Toast.makeText(this, "Total score is ${gvm.getTotalScore()}", Toast.LENGTH_SHORT).show()
+            if (gvm.round == 3) {
+                Intent(this, HighscoreActivity::class.java).also {
+                    startActivity(it)
+                }
+            }
+
             gvm.roundDone()
             showThrowMenu()
             spinner.isEnabled = true
+            val dropDownChoices = gvm.getAvailableChoices().toMutableList()
+            choiceAdapter.clear()
+            choiceAdapter.addAll(dropDownChoices)
             renderDice(gvm.getDice())
         }
 
@@ -81,6 +96,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("MainActivity","Score is $score")
             renderDice(gvm.getDice())
             spinner.isEnabled = false
+
         }
 
         // Add listeners to each die's ImageView.
@@ -179,11 +195,13 @@ class MainActivity : AppCompatActivity() {
         diceImages = arrayOf(die1, die2, die3, die4, die5, die6)
 
         // Set up the spinner with choices (LOW, FOUR, FIVE, etc)
-        val dropDownChoices = Choice.values()
-        val choiceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dropDownChoices)
+        val dropDownChoices = gvm.getAvailableChoices().toMutableList()
+        choiceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dropDownChoices)
         choiceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
+        choiceAdapter.setNotifyOnChange(true)
         spinner.adapter = choiceAdapter
-
     }
+
+
 
 }
