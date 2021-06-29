@@ -49,7 +49,6 @@ class TestPlayer {
         sut.addScore(score2)
         assertEquals(14, sut.getCurrScore())
     }
-
 }
 
 class TestGame {
@@ -65,4 +64,28 @@ class TestGame {
         assert(!b.contains(Choice.LOW))
         assertNotEquals(a.size, b.size)
     }
+    @Test
+    fun roundsAreCorrect() {
+        val sut = GameViewModel()
+        val data = arrayOf (Die(1), Die(3))
+        val data2 = arrayOf (Die(6), Die(6))
+        val data3 = arrayOf (Die(4), Die(2), Die(1))
+        val data4 = arrayOf (Die(6), Die(1))
+        sut.addScore(Choice.LOW, data)
+        sut.roundDone()
+        sut.addScore(Choice.TWELVE, data2)
+        sut.roundDone()
+        sut.addScore(Choice.SEVEN, data3)
+        sut.addScore(Choice.SEVEN, data4)
+        sut.roundDone()
+        val actual = sut.getRounds()
+        val expected = arrayOf (
+            Round(1, Choice.LOW, 4),
+            Round(2, Choice.TWELVE, 12),
+            Round(3, Choice.SEVEN, 14)
+        )
+        assertArrayEquals(expected, actual)
+
+    }
+
 }

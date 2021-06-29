@@ -21,21 +21,16 @@ class MainActivity : AppCompatActivity() {
     private lateinit var throwButton: Button
     private lateinit var addScore: Button
     private lateinit var roundDone: Button
+    private lateinit var diceImages: Array<ImageView>
+    private lateinit var gvm: GameViewModel
+    private lateinit var choiceAdapter: ArrayAdapter<Choice>
     private lateinit var die1: ImageView
     private lateinit var die2: ImageView
     private lateinit var die3: ImageView
     private lateinit var die4: ImageView
     private lateinit var die5: ImageView
     private lateinit var die6: ImageView
-    private lateinit var diceImages: Array<ImageView>
-    private lateinit var gvm: GameViewModel
-    private lateinit var choiceAdapter: ArrayAdapter<Choice>
 
-    /*
-    TODO: Remove this when the app compiles again
-    private val gvm: GameViewModel by lazy {
-        ViewModelProviders.of(this).get(GameViewModel::class.java)
-    } */
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,13 +39,11 @@ class MainActivity : AppCompatActivity() {
         findALlViews() // Make all views accessible in the code
         renderDice(gvm.getDice()) // Render the dice to reflect their values
 
-
       //  var round = savedInstanceState?.getInt(ROUND) ?: 0
        // var throws = savedInstanceState?.getInt(THROWS) ?: 0
         throwButton.visibility = savedInstanceState?.getInt(THROW_VISIBLE) ?: View.VISIBLE
         findViewById<LinearLayout>(R.id.score_buttons).visibility = savedInstanceState?.getInt(
             SCORE_MENU_VISIBLE) ?: View.GONE
-
 
         // Add a listener to the throwButton
         throwButton.setOnClickListener {
@@ -69,14 +62,20 @@ class MainActivity : AppCompatActivity() {
          * When clicked the next round starts.
          */
         roundDone.setOnClickListener {
-            Toast.makeText(this, "Total score is ${gvm.getTotalScore()}", Toast.LENGTH_SHORT).show()
-            if (gvm.round == 3) {
+            Toast.makeText(this, "Current score is ${gvm.getTotalScore()}", Toast.LENGTH_SHORT).show()
+            gvm.roundDone()
+
+            if (gvm.round >= 10) {
+                val rounds = gvm.getRounds()
+
                 Intent(this, HighscoreActivity::class.java).also {
+                    it.putExtra("EXTRA_ROUNDS", rounds)
+                    it.putExtra("EXTRA_NAME", "I am here")
                     startActivity(it)
                 }
             }
 
-            gvm.roundDone()
+
             showThrowMenu()
             spinner.isEnabled = true
             val dropDownChoices = gvm.getAvailableChoices().toMutableList()

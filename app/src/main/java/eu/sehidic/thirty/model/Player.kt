@@ -14,6 +14,10 @@ class Player {
         this.score.add(newScore)
     }
 
+    /**
+     * Clears the current score for the player.
+     * Used for cleanup between rounds.
+     */
     fun clearScore() {
         this.score.clear()
     }
@@ -26,6 +30,13 @@ class Player {
         }
     }
 
+    /**
+     * Returns the current score for this round.
+     * The sum of each successful attempt to score the target with dice.
+     * Should be reset between rounds.
+     * @see clearScore()
+     * @return Score of current round.
+     */
     fun getCurrScore(): Int {
        return score.fold(0) { acc, e -> acc + e.score }
     }

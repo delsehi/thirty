@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 const val MAX_THROWS = 2 // Constant instead of magic numbers :)
 
 /**
- * Controller class used by MainActivity.
+ * Game logic controller class used by MainActivity.
  *
  */
 class GameViewModel: ViewModel() {
@@ -25,6 +25,10 @@ class GameViewModel: ViewModel() {
     }
     fun getKeptDice(): Array<Die> {
         return player.dice.filter { it.keep }.toTypedArray()
+    }
+
+    fun getRounds(): Array<Round>  {
+        return rounds.toTypedArray()
     }
 
     fun roundDone() {
