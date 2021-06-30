@@ -1,5 +1,8 @@
 package eu.sehidic.thirty.model
 
+/**
+ * Used for saving the state of the game to bundle.
+ */
 import java.io.Serializable
 
 data class GameState(

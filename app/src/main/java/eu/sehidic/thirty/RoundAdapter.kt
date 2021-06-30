@@ -1,5 +1,10 @@
 package eu.sehidic.thirty
 
+/**
+ * Adapter used for the dropdown menu to display available scoring choices at the
+ * end of a round.
+ *
+ */
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
