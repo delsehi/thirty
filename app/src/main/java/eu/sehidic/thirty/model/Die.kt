@@ -1,6 +1,8 @@
 package eu.sehidic.thirty.model
 
-class Die (newValue: Int = 0) {
+import java.io.Serializable
+
+class Die(newValue: Int = 0): Serializable {
     var value = newValue // 0 if not set explicitly
     var used = false
     var keep = false

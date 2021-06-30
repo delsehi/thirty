@@ -8,4 +8,4 @@ import java.io.Serializable
  * @param choice What scoring choice was used (e.g. LOW, FOUR, FIVE, etc)
  * @param score What the final score was from the round.
  */
-data class Round(val round: Int, val choice: Choice, val score: Int = 0): Serializable
+data class Round(val round: Int, val choice: Choice, val score: Int = 0) : Serializable

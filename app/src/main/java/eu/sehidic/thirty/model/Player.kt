@@ -1,6 +1,8 @@
 package eu.sehidic.thirty.model
 
-class Player {
+import java.io.Serializable
+
+class Player: Serializable {
     val dice = Array(6) { Die() }
     private val score: MutableList<Score> = ArrayList()
 
@@ -38,7 +40,7 @@ class Player {
      * @return Score of current round.
      */
     fun getCurrScore(): Int {
-       return score.fold(0) { acc, e -> acc + e.score }
+        return score.fold(0) { acc, e -> acc + e.score }
     }
 
     fun useKeptDice() {

@@ -3,16 +3,14 @@ package eu.sehidic.thirty
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.*
 import androidx.lifecycle.ViewModelProvider
 import eu.sehidic.thirty.model.Choice
 import eu.sehidic.thirty.model.Die
+import eu.sehidic.thirty.model.GameState
 import eu.sehidic.thirty.model.GameViewModel
 
-private const val ROUND = "ROUND"
-private const val THROWS = "THROWS"
 private const val THROW_VISIBLE = "THROW_VISIBLE"
 private const val SCORE_MENU_VISIBLE = "SCORE_MENU_VISIBLE"
 
@@ -21,8 +19,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var throwButton: Button
     private lateinit var addScore: Button
     private lateinit var roundDone: Button
+    private lateinit var scoreButtons: LinearLayout
     private lateinit var diceImages: Array<ImageView>
-    private lateinit var gvm: GameViewModel
+    private lateinit var gameViewModel: GameViewModel
     private lateinit var choiceAdapter: ArrayAdapter<Choice>
     private lateinit var die1: ImageView
     private lateinit var die2: ImageView
@@ -35,65 +34,62 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        gvm = ViewModelProvider(this).get(GameViewModel::class.java)
+        gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
         findALlViews() // Make all views accessible in the code
-        renderDice(gvm.getDice()) // Render the dice to reflect their values
+        renderDice(gameViewModel.getDice()) // Render the dice to reflect their values
 
-      //  var round = savedInstanceState?.getInt(ROUND) ?: 0
-       // var throws = savedInstanceState?.getInt(THROWS) ?: 0
-        throwButton.visibility = savedInstanceState?.getInt(THROW_VISIBLE) ?: View.VISIBLE
-        findViewById<LinearLayout>(R.id.score_buttons).visibility = savedInstanceState?.getInt(
-            SCORE_MENU_VISIBLE) ?: View.GONE
 
         // Add a listener to the throwButton
         throwButton.setOnClickListener {
-            gvm.throwDice() // Throw the dice
+            gameViewModel.throwDice() // Throw the dice
             // If the player has thrown less than 2 times
-            if (gvm.canThrow()) {
-                renderDice(gvm.getDice()) // And update their images accordingly.
+            if (gameViewModel.canThrow()) {
+                renderDice(gameViewModel.getDice()) // And update their images accordingly.
             } else {
-                gvm.unKeepAllDice()
-                renderDice(gvm.getDice())
-                throwButton.visibility = View.GONE
-                findViewById<LinearLayout>(R.id.score_buttons).visibility = View.VISIBLE
+                gameViewModel.unKeepAllDice()
+                renderDice(gameViewModel.getDice())
+                showScoreMenu()
             }
         }
         /**
-         * When clicked the next round starts.
+         * When clicked the next round starts or if the game is finished the highscore activity is started.
          */
         roundDone.setOnClickListener {
-            Toast.makeText(this, "Current score is ${gvm.getTotalScore()}", Toast.LENGTH_SHORT).show()
-            gvm.roundDone()
+            Toast.makeText(
+                this,
+                "${gameViewModel.getTotalScore()} points this round.",
+                Toast.LENGTH_SHORT
+            ).show()
+            gameViewModel.roundDone()
 
-            if (gvm.round >= 10) {
-                val rounds = gvm.getRounds()
+
+            if (gameViewModel.round > 10) { // TODO: Remove magic number 10.
+                val rounds = gameViewModel.getRounds()
 
                 Intent(this, HighscoreActivity::class.java).also {
                     it.putExtra("EXTRA_ROUNDS", rounds)
-                    it.putExtra("EXTRA_NAME", "I am here")
                     startActivity(it)
                 }
+                gameViewModel.resetGame()
             }
-
 
             showThrowMenu()
             spinner.isEnabled = true
-            val dropDownChoices = gvm.getAvailableChoices().toMutableList()
+            val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
             choiceAdapter.clear()
             choiceAdapter.addAll(dropDownChoices)
-            renderDice(gvm.getDice())
+            renderDice(gameViewModel.getDice())
         }
 
         /**
          * Score for the selected dice is calculated and added to the score.
          */
         addScore.setOnClickListener {
-            val chosenDice = gvm.getKeptDice()
+            val chosenDice = gameViewModel.getKeptDice()
             val scoreChoice = spinner.selectedItem
-            val score = gvm.addScore(scoreChoice as Choice, chosenDice)
+            val score = gameViewModel.addScore(scoreChoice as Choice, chosenDice)
             Toast.makeText(this, "$score points", Toast.LENGTH_SHORT).show()
-            Log.d("MainActivity","Score is $score")
-            renderDice(gvm.getDice())
+            renderDice(gameViewModel.getDice())
             spinner.isEnabled = false
 
         }
@@ -101,17 +97,34 @@ class MainActivity : AppCompatActivity() {
         // Add listeners to each die's ImageView.
         for ((index, die) in diceImages.withIndex()) makeDieKeepable(die, index)
 
-    }
+    } // END OF onCreate()
 
     /**
-     * Saves the current UI to a bundle.
+     * Saves the current state to a bundle.
      */
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putInt(ROUND, gvm.round) // Save the current round (0-10)
-        outState.putInt(THROWS, gvm.throws)
         outState.putInt(THROW_VISIBLE, throwButton.visibility)
-        outState.putInt(SCORE_MENU_VISIBLE, findViewById<LinearLayout>(R.id.score_buttons).visibility)
+        outState.putInt(
+            SCORE_MENU_VISIBLE,
+            findViewById<LinearLayout>(R.id.score_buttons).visibility
+        )
+        outState.putSerializable("GAME_STATE", gameViewModel.getGameState())
+    }
+
+    /**
+     * Retrieves the saved state.
+     */
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        throwButton.visibility = savedInstanceState.getInt(THROW_VISIBLE)
+        scoreButtons.visibility = savedInstanceState.getInt(SCORE_MENU_VISIBLE)
+        gameViewModel.setGameState(savedInstanceState.getSerializable("GAME_STATE") as GameState)
+        renderDice(gameViewModel.getDice())
+        val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
+        choiceAdapter.clear()
+        choiceAdapter.addAll(dropDownChoices)
+
     }
 
     /**
@@ -131,7 +144,7 @@ class MainActivity : AppCompatActivity() {
 
     /**
      * Get the drawable resource from a die value.
-     * @param dieValue The value (1-6) of the die.
+     * @param dieValue The value (0-6) of the die.
      * @param isKept Whether the die should be thrown or not.
      * @return The resId of the resource.
      */
@@ -170,10 +183,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun makeDieKeepable(die: ImageView, index: Int) {
         die.setOnClickListener {
-            // TODO: Remove magic number to GameViewModel instead of here
-            if (gvm.throws > 0) { // Must've thrown at least once
-                gvm.toggleKeep(index)
-                renderDice(gvm.getDice())
+            if (gameViewModel.hasThrown()) { // Must've thrown at least once
+                gameViewModel.toggleKeep(index)
+                renderDice(gameViewModel.getDice())
             }
         }
     }
@@ -183,6 +195,7 @@ class MainActivity : AppCompatActivity() {
         throwButton = findViewById(R.id.throw_button) // Button for throwing dice.
         addScore = findViewById(R.id.add_score)
         roundDone = findViewById(R.id.done)
+        scoreButtons = findViewById(R.id.score_buttons)
         // Fetch all dice from activity_main
         die1 = findViewById(R.id.die1)
         die2 = findViewById(R.id.die2)
@@ -194,13 +207,12 @@ class MainActivity : AppCompatActivity() {
         diceImages = arrayOf(die1, die2, die3, die4, die5, die6)
 
         // Set up the spinner with choices (LOW, FOUR, FIVE, etc)
-        val dropDownChoices = gvm.getAvailableChoices().toMutableList()
+        val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
         choiceAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, dropDownChoices)
         choiceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_item)
         choiceAdapter.setNotifyOnChange(true)
         spinner.adapter = choiceAdapter
     }
-
 
 
 }

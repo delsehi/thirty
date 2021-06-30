@@ -8,10 +8,10 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.sehidic.thirty.model.Round
 
 class RoundAdapter(
-    var rounds: List<Round>
-): RecyclerView.Adapter<RoundAdapter.RoundViewHolder>() {
+    private var rounds: List<Round>
+) : RecyclerView.Adapter<RoundAdapter.RoundViewHolder>() {
 
-    inner class RoundViewHolder(itemView: View): RecyclerView.ViewHolder(itemView)
+    inner class RoundViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RoundViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.round, parent, false)
@@ -21,7 +21,8 @@ class RoundAdapter(
     override fun onBindViewHolder(holder: RoundViewHolder, position: Int) {
         holder.itemView.apply {
             val curr = rounds[position]
-            findViewById<TextView>(R.id.tvRound).text = "Round ${curr.round} Scoring ${curr.choice} Score ${curr.score}"
+            findViewById<TextView>(R.id.tvRound).text =
+                "Round ${curr.round} Scoring ${curr.choice} Score ${curr.score}"
         }
     }
 
