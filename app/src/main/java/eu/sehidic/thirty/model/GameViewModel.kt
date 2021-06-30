@@ -33,6 +33,10 @@ class GameViewModel : ViewModel() {
         return rounds.toTypedArray()
     }
 
+    fun hasCurrentChoice(): Boolean {
+        return currentChoice != null
+    }
+
     fun roundDone() {
         throws = 0
         currentChoice?.let {

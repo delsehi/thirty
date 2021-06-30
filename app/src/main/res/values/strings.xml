@@ -15,4 +15,6 @@
     <string name="die">A die</string>
     <string name="throw_button_string">Throw</string>
     <string name="title">Thirty Throws</string>
+    <string name="add_score">Add score</string>
+    <string name="done">Done</string>
 </resources>

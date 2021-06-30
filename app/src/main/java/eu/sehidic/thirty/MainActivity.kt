@@ -13,6 +13,7 @@ import eu.sehidic.thirty.model.GameViewModel
 
 private const val THROW_VISIBLE = "THROW_VISIBLE"
 private const val SCORE_MENU_VISIBLE = "SCORE_MENU_VISIBLE"
+private const val SPINNER_ENABLED = "SPINNER_ENABLED"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var spinner: Spinner
@@ -55,30 +56,40 @@ class MainActivity : AppCompatActivity() {
          * When clicked the next round starts or if the game is finished the highscore activity is started.
          */
         roundDone.setOnClickListener {
-            Toast.makeText(
-                this,
-                "${gameViewModel.getTotalScore()} points this round.",
-                Toast.LENGTH_SHORT
-            ).show()
-            gameViewModel.roundDone()
+            if (!gameViewModel.hasCurrentChoice()) {
+                Toast.makeText(
+                    this,
+                    "You must select a scoring method.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                Toast.makeText(
+                    this,
+                    "${gameViewModel.getTotalScore()} points this round.",
+                    Toast.LENGTH_SHORT
+                ).show()
+
+                gameViewModel.roundDone()
 
 
-            if (gameViewModel.round > 10) { // TODO: Remove magic number 10.
-                val rounds = gameViewModel.getRounds()
+                if (gameViewModel.round > 10) { // TODO: Remove magic number 10.
+                    val rounds = gameViewModel.getRounds()
 
-                Intent(this, HighscoreActivity::class.java).also {
-                    it.putExtra("EXTRA_ROUNDS", rounds)
-                    startActivity(it)
+                    Intent(this, HighscoreActivity::class.java).also {
+                        it.putExtra("EXTRA_ROUNDS", rounds)
+                        startActivity(it)
+                    }
+                    gameViewModel.resetGame()
                 }
-                gameViewModel.resetGame()
+
+                showThrowMenu()
+                spinner.isEnabled = true
+                val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
+                choiceAdapter.clear()
+                choiceAdapter.addAll(dropDownChoices)
+                renderDice(gameViewModel.getDice())
             }
 
-            showThrowMenu()
-            spinner.isEnabled = true
-            val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
-            choiceAdapter.clear()
-            choiceAdapter.addAll(dropDownChoices)
-            renderDice(gameViewModel.getDice())
         }
 
         /**
@@ -110,6 +121,7 @@ class MainActivity : AppCompatActivity() {
             findViewById<LinearLayout>(R.id.score_buttons).visibility
         )
         outState.putSerializable("GAME_STATE", gameViewModel.getGameState())
+        outState.putBoolean(SPINNER_ENABLED, spinner.isEnabled)
     }
 
     /**
@@ -124,6 +136,7 @@ class MainActivity : AppCompatActivity() {
         val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
         choiceAdapter.clear()
         choiceAdapter.addAll(dropDownChoices)
+        spinner.isEnabled = savedInstanceState.getBoolean(SPINNER_ENABLED)
 
     }
 
