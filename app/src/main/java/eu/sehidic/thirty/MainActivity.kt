@@ -46,85 +46,13 @@ class MainActivity : AppCompatActivity() {
         gameViewModel = ViewModelProvider(this).get(GameViewModel::class.java)
         findALlViews() // Make all views accessible in the code
         renderDice(gameViewModel.getDice()) // Render the dice to reflect their values
-
-        /**
-         * When the throw button is clicked, the dice that have not been
-         * selected are thrown. If they've thrown 3 times, the scoring menu is displayed.
-         */
-        throwButton.setOnClickListener {
-            gameViewModel.throwDice() // Throw the dice
-            // If the player has thrown less than 2 times
-            if (gameViewModel.canThrow()) {
-                renderDice(gameViewModel.getDice()) // And update their images accordingly.
-            } else {
-                // If the player has already thrown, make the dice
-                // available for selecting for scoring
-                gameViewModel.unKeepAllDice()
-                renderDice(gameViewModel.getDice())
-                // Show the menu where the user can choose how to score the dice for this round
-                showScoreMenu()
-            }
-        }
-        /**
-         * When clicked the next round starts or if the game is finished the highscore activity is started.
-         */
-        roundDone.setOnClickListener {
-            // Guard statement to make sure a scoring choice is always selected.
-            if (!gameViewModel.hasCurrentChoice()) {
-                Toast.makeText(
-                    this,
-                    "You must select a scoring method.",
-                    Toast.LENGTH_SHORT
-                ).show()
-            } else {
-                // Display the score from this particular round.
-                Toast.makeText(
-                    this,
-                    "${gameViewModel.getTotalScore()} points this round.",
-                    Toast.LENGTH_SHORT
-                ).show()
-                // Notify gameViewModel that throws should be reset, player's current score
-                // should be reset, etc.
-                gameViewModel.roundDone()
-                // If rounds == 10, the game is over.
-                if (gameViewModel.round > 10) { // TODO: Remove magic number 10.
-                    // Fetch the rounds
-                    val rounds = gameViewModel.getRounds()
-                    // And pass them to the HighscoreActivity
-                    Intent(this, HighscoreActivity::class.java).also {
-                        it.putExtra("EXTRA_ROUNDS", rounds)
-                        startActivity(it)
-                    }
-                    // Reset the game so the user can play again after reviewing the score.
-                    gameViewModel.resetGame()
-                }
-                // Round done, set up for a new round.
-                showThrowMenu()
-                spinner.isEnabled = true
-                // Update the available scoring choices by getting updated data
-                val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
-                choiceAdapter.clear()
-                choiceAdapter.addAll(dropDownChoices)
-                renderDice(gameViewModel.getDice())
-            }
-        }
-
-        /**
-         * Score for the selected dice is calculated and added to the score.
-         */
-        addScore.setOnClickListener {
-            val chosenDice = gameViewModel.getKeptDice()
-            val scoreChoice = spinner.selectedItem
-            val score = gameViewModel.addScore(scoreChoice as Choice, chosenDice)
-            Toast.makeText(this, "$score points", Toast.LENGTH_SHORT).show()
-            renderDice(gameViewModel.getDice())
-            spinner.isEnabled = false
-        }
-
+        // Set onClickListeners to the buttons.
+        setOnClickListenerThrowBtn(throwButton)
+        setOnClickListenerDoneBtn(roundDone)
+        setOnClickListenerAddScoreBtn(addScore)
         // Add listeners to each die's ImageView.
         for ((index, die) in diceImages.withIndex()) makeDieKeepable(die, index)
-
-    } // END OF onCreate()
+    }
 
     /**
      * Saves the current state to a bundle.
@@ -146,11 +74,7 @@ class MainActivity : AppCompatActivity() {
         scoreButtons.visibility = savedInstanceState.getInt(SCORE_MENU_VISIBLE)
         gameViewModel.setGameState(savedInstanceState.getSerializable(GAME_STATE) as GameState)
         renderDice(gameViewModel.getDice())
-        // Make sure the dropdown choices are rendered properly
-        val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
-        choiceAdapter.clear()
-        choiceAdapter.addAll(dropDownChoices)
-        spinner.isEnabled = savedInstanceState.getBoolean(SPINNER_ENABLED)
+        renderDropDownChoices(savedInstanceState.getBoolean(SPINNER_ENABLED))
     }
 
     /**
@@ -226,6 +150,96 @@ class MainActivity : AppCompatActivity() {
                 renderDice(gameViewModel.getDice())
             }
         }
+    }
+    /**
+     * When the throw button is clicked, the dice that have not been
+     * selected are thrown. If they've thrown 3 times, the scoring menu is displayed.
+     * @param throwButton The button to add the onClickListener to.
+     */
+    private fun setOnClickListenerThrowBtn(throwButton: Button) {
+        throwButton.setOnClickListener {
+            gameViewModel.throwDice() // Throw the dice
+            // If the player has thrown less than 2 times
+            if (gameViewModel.canThrow()) {
+                renderDice(gameViewModel.getDice()) // And update their images accordingly.
+            } else {
+                // If the player has already thrown, make the dice
+                // available for selecting for scoring
+                gameViewModel.unKeepAllDice()
+                renderDice(gameViewModel.getDice())
+                // Show the menu where the user can choose how to score the dice for this round
+                showScoreMenu()
+            }
+        }
+    }
+    /**
+     * When clicked the next round starts or if the game is finished the highscore activity is started.
+     * @param roundDone The button to add the onClickListener to.
+     */
+    private fun setOnClickListenerDoneBtn(roundDone: Button) {
+        roundDone.setOnClickListener {
+            // Guard statement to make sure a scoring choice is always selected.
+            if (!gameViewModel.hasCurrentChoice()) {
+                Toast.makeText(
+                    this,
+                    "You must select a scoring method.",
+                    Toast.LENGTH_SHORT
+                ).show()
+            } else {
+                // Display the score from this particular round.
+                Toast.makeText(
+                    this,
+                    "${gameViewModel.getTotalScore()} points this round.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                // Notify gameViewModel that throws should be reset, player's current score
+                // should be reset, etc.
+                gameViewModel.roundDone()
+                // If rounds == 10, the game is over.
+                if (gameViewModel.round > 10) { // TODO: Remove magic number 10.
+                    // Fetch the rounds
+                    val rounds = gameViewModel.getRounds()
+                    // And pass them to the HighscoreActivity
+                    Intent(this, HighscoreActivity::class.java).also {
+                        it.putExtra("EXTRA_ROUNDS", rounds)
+                        startActivity(it)
+                    }
+                    // Reset the game so the user can play again after reviewing the score.
+                    gameViewModel.resetGame()
+                }
+                // Round done, set up for a new round.
+                showThrowMenu()
+                spinner.isEnabled = true
+                // Update the available scoring choices by getting updated data
+                renderDropDownChoices(true)
+                renderDice(gameViewModel.getDice())
+            }
+        }
+    }
+    /**
+     * Score for the selected dice is calculated and added to the score.
+     */
+    private fun setOnClickListenerAddScoreBtn(addScore: Button) {
+        addScore.setOnClickListener {
+            val chosenDice = gameViewModel.getKeptDice()
+            val scoreChoice = spinner.selectedItem
+            val score = gameViewModel.addScore(scoreChoice as Choice, chosenDice)
+            Toast.makeText(this, "$score points", Toast.LENGTH_SHORT).show()
+            renderDice(gameViewModel.getDice())
+            spinner.isEnabled = false
+        }
+    }
+
+    /**
+     * Fetches the currently available choices from game controller
+     * and updates the spinner.
+     * @param spinnerEnabled If the spinner should be enabled or not.
+     */
+    private fun renderDropDownChoices(spinnerEnabled: Boolean) {
+        val dropDownChoices = gameViewModel.getAvailableChoices().toMutableList()
+        choiceAdapter.clear()
+        choiceAdapter.addAll(dropDownChoices)
+        spinner.isEnabled = spinnerEnabled
     }
 
     /**
